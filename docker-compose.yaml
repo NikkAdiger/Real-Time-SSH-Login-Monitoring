@@ -5,13 +5,13 @@ services:
       context: ./web
       dockerfile: Dockerfile
       args:
-        REACT_APP_WS_URL: ${REACT_APP_WS_URL}
-        REACT_APP_API_URL: ${REACT_APP_API_URL}
+        REACT_APP_WS_URL: ws://51.15.224.192:3010
+        REACT_APP_API_URL: http://51.15.224.192:3010
     ports:
       - "3000:80"
     environment:
-      REACT_APP_WS_URL: ${REACT_APP_WS_URL}
-      REACT_APP_API_URL: ${REACT_APP_API_URL}
+      REACT_APP_WS_URL: ws://51.15.224.192:3010
+      REACT_APP_API_URL: http://51.15.224.192:3010
     depends_on:
       - backend
     networks:
