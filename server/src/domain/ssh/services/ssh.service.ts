@@ -95,7 +95,7 @@ export class SshService {
 		const failedRegex = /Failed password for (invalid user )?(?<username>[^\s]+) from (?<ip>[^\s]+)/;
 		const acceptedRegex = /Accepted (?<authMethod>\w+) for (?<username>[^\s]+) from (?<ip>[^\s]+)/;
 		const invalidUserRegex = /Invalid user (?<username>[^\s]+) from (?<ip>[^\s]+)/;
-		const disconnectedRegex = /Received disconnected from (?<ip>[^\s]+)/;
+		const disconnectedRegex = /Received disconnect from (?<ip>[^\s]+)/;
 		const pamRegex = /pam_unix\(sshd:auth\): (?:check pass; )?(?:user unknown|authentication failure); logname=.* ruser=.* rhost=(?<ip>[^\s]+)/;
 		
 		let messageMatch = message.match(failedRegex) || message.match(acceptedRegex) || message.match(invalidUserRegex) || message.match(disconnectedRegex) || message.match(pamRegex);
