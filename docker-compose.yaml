@@ -1,0 +1,68 @@
+
+services:
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_WS_URL: ${REACT_APP_WS_URL}
+        REACT_APP_API_URL: ${REACT_APP_API_URL}
+    ports:
+      - "3000:80"
+    environment:
+      REACT_APP_WS_URL: ${REACT_APP_WS_URL}
+      REACT_APP_API_URL: ${REACT_APP_API_URL}
+    depends_on:
+      - backend
+    networks:
+      app-network:
+        aliases:
+          - backend
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "3010:3010"
+    environment:
+      DB_HOST: postgres-db
+      DB_PORT: 5432
+      DB_USERNAME: admin
+      DB_PASSWORD: admin
+      DB_NAME: ssh_monitor
+      API_PORT: 3010
+      DB_SYNCHRONIZE: false
+      DB_LOGGING: false
+      DB_RUN_MIGRATIONS: true
+      LOG_FILE: /var/log/auth.log
+    volumes:
+      - /var/log:/var/log 
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    networks:
+      app-network:
+    restart: unless-stopped
+
+  postgres-db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: ssh_monitor
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d ssh_monitor"]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+
+networks:
+  app-network:
+    driver: bridge
