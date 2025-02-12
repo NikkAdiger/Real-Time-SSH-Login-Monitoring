@@ -76,7 +76,17 @@ git clone <repository-url>
 cd <project-folder>
 ```
 
-### 2. Build Docker Containers and start services
+### 2. Update the following environment variables in the `/web/.env` file to match your backend service's address:
+
+	```
+	REACT_APP_API_URL=http://localhost:3010  # Replace with your backend API URL (e.g., http://your-backend-service:3010)
+	REACT_APP_WS_URL=ws://localhost:3010     # Replace with your backend WebSocket URL (e.g., ws://your-backend-service:3010)
+	```
+
+	*   If your backend is running in Docker, you'll likely use the service name (e.g., `http://backend:3010` and `ws://backend:3010`).
+	*   If running the backend locally, use `localhost` (as shown above).
+
+### 3. Build Docker Containers and start services
 	The project is configured using Docker Compose to manage all services. To build the containers for all services (web, server, and postgres-db), use the following command:
 
 ```bash
@@ -88,12 +98,12 @@ docker compose up -d --build
 	Start the web on port 3000.
 	Start PostgreSQL on port 5432 for database operations.
 
-### 3. Access the Application
+### 4. Access the Application
 	Frontend (Web): Access the application by navigating to http://<ip address of server>:3000 in your browser.
 	Backend (API): The API is accessible at http://<ip address of server>:3010.
 	Backend (WS): The WS is accessible at ws://<ip address of server>:3010.
 
-### 4. Stop Services
+### 5. Stop Services
 	To stop all services, use:
 
 ```bash
