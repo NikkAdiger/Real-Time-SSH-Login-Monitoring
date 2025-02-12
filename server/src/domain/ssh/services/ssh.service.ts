@@ -110,7 +110,7 @@ export class SshService {
 				authMethod = messageMatch.groups.authMethod;
 			} else if (message.includes("Invalid user")) {
 				status = "Invalid user";
-			} else if (message.includes("Received disconnected")) {
+			} else if (message.includes("Received disconnect")) {
 				status = "Disconnected";
 			} else if (message.includes("pam_unix")) {
 				status = "Failed";
