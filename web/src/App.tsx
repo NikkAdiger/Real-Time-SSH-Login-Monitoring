@@ -1,11 +1,22 @@
 	import { useState, useEffect } from 'react';
-	import io, { Socket } from 'socket.io-client';
+	import io from 'socket.io-client';
 	import { format } from 'date-fns'; // Make sure you have date-fns installed: npm install date-fns
 	import React from 'react';
 	import { getLoginEvents } from './services/loginEventsService.ts';
 
 	const App = () => {
-	const [events, setEvents] = useState([]);
+	const visiblePages = 10;
+
+	interface Event {
+		username: string;
+		ip: string;
+		host: string;
+		timestamp: number;
+		authMethod: string;
+		status: string;
+	}
+
+	const [events, setEvents] = useState<Event[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [pagination, setPagination] = useState({
 		page: 1,
@@ -13,7 +24,7 @@
 		total: 0,
 		totalNumberOfPages: 0,
 	});
-	const [socket, setSocket] = useState(null);
+	const [ , setSocket] = useState(null);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
@@ -45,6 +56,30 @@
 
 	const handleSearchChange = (value: string) => {
 		setSearchQuery(value);
+	};
+
+	const getPageRange = () => {
+		const totalPages = pagination.totalNumberOfPages;
+		const currentPage = pagination.page;
+
+		if (totalPages <= visiblePages) {
+			return [1, totalPages]; // Show all pages if total is less than or equal to visiblePages
+		}
+
+		const halfVisible = Math.floor(visiblePages / 2);
+		let startPage = Math.max(1, currentPage - halfVisible);
+		let endPage = Math.min(totalPages, currentPage + halfVisible);
+
+		// Adjust start and end if near boundaries
+		if (endPage - startPage + 1 < visiblePages) {
+			if (currentPage <= halfVisible) {
+				endPage = Math.min(totalPages, visiblePages);
+			} else {
+				startPage = Math.max(1, totalPages - visiblePages + 1);
+			}
+		}
+
+		return [startPage, endPage];
 	};
 
 	useEffect(() => {
@@ -158,19 +193,39 @@
 			<nav className="mt-4">
 				<ul className="pagination justify-content-center">
 					<li className={`page-item ${pagination.page === 1 ? 'disabled' : ''}`}>
-						<button className="page-link" onClick={() => handlePageChange(pagination.page - 1)}>
+						<button className="page-link" onClick={() => handlePageChange(1)} aria-label="First">
 							&laquo;
 						</button>
 					</li>
-					{[...Array(pagination.totalNumberOfPages)].map((_, idx) => (
-						<li key={idx} className={`page-item ${pagination.page === idx + 1 ? 'active' : ''}`}>
-							<button className="page-link" onClick={() => handlePageChange(idx + 1)}>
-								{idx + 1}
-							</button>
-						</li>
-					))}
+					<li className={`page-item ${pagination.page === 1 ? 'disabled' : ''}`}>
+						<button className="page-link" onClick={() => handlePageChange(pagination.page - 1)} aria-label="Previous">
+							&lt;
+						</button>
+					</li>
+
+					{(() => {
+						const [startPage, endPage] = getPageRange();
+						const pages = [];
+
+						for (let i = startPage; i <= endPage; i++) {
+							pages.push(
+								<li key={i} className={`page-item ${pagination.page === i ? 'active' : ''}`}>
+									<button className="page-link" onClick={() => handlePageChange(i)}>
+										{i}
+									</button>
+								</li>
+							);
+						}
+						return pages;
+					})()}
+
 					<li className={`page-item ${pagination.page === pagination.totalNumberOfPages ? 'disabled' : ''}`}>
-						<button className="page-link" onClick={() => handlePageChange(pagination.page + 1)}>
+						<button className="page-link" onClick={() => handlePageChange(pagination.page + 1)} aria-label="Next">
+							&gt;
+						</button>
+					</li>
+					<li className={`page-item ${pagination.page === pagination.totalNumberOfPages ? 'disabled' : ''}`}>
+						<button className="page-link" onClick={() => handlePageChange(pagination.totalNumberOfPages)} aria-label="Last">
 							&raquo;
 						</button>
 					</li>
