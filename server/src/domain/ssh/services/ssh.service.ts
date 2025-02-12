@@ -95,9 +95,10 @@ export class SshService {
 		const failedRegex = /Failed password for (invalid user )?(?<username>[^\s]+) from (?<ip>[^\s]+)/;
 		const acceptedRegex = /Accepted (?<authMethod>\w+) for (?<username>[^\s]+) from (?<ip>[^\s]+)/;
 		const invalidUserRegex = /Invalid user (?<username>[^\s]+) from (?<ip>[^\s]+)/;
+		const disconnectedRegex = /Received disconnected from (?<ip>[^\s]+)/;
 		const pamRegex = /pam_unix\(sshd:auth\): (?:check pass; )?(?:user unknown|authentication failure); logname=.* ruser=.* rhost=(?<ip>[^\s]+)/;
 		
-		let messageMatch = message.match(failedRegex) || message.match(acceptedRegex) || message.match(invalidUserRegex) || message.match(pamRegex);
+		let messageMatch = message.match(failedRegex) || message.match(acceptedRegex) || message.match(invalidUserRegex) || message.match(disconnectedRegex) || message.match(pamRegex);
 	
 		if (messageMatch) {
 			({ username, ip } = messageMatch.groups);
@@ -109,6 +110,8 @@ export class SshService {
 				authMethod = messageMatch.groups.authMethod;
 			} else if (message.includes("Invalid user")) {
 				status = "Invalid user";
+			} else if (message.includes("Received disconnected")) {
+				status = "Disconnected";
 			} else if (message.includes("pam_unix")) {
 				status = "Failed";
 			}
